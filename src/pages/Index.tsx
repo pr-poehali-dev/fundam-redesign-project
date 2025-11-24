@@ -2,10 +2,22 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import Icon from '@/components/ui/icon';
 
 const Index = () => {
   const [activeService, setActiveService] = useState<number | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   const features = [
     {
@@ -127,6 +139,33 @@ const Index = () => {
       answer: 'Конечно! Предоставим кейсы из вашей отрасли с метриками результатов. Некоторые проекты под NDA - покажем общую информацию.'
     }
   ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    setTimeout(() => {
+      toast({
+        title: "Заявка отправлена!",
+        description: "Мы свяжемся с вами в ближайшее время.",
+      });
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        company: '',
+        message: ''
+      });
+      setIsSubmitting(false);
+    }, 1000);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -354,27 +393,111 @@ const Index = () => {
 
       <section id="contact" className="py-20 px-4">
         <div className="container mx-auto max-w-4xl">
-          <Card className="p-12 text-center bg-gradient-to-br from-primary/10 via-secondary/10 to-primary/10 border-2 border-primary/20">
-            <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4">
-              Готовы начать проект?
-            </h2>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Свяжитесь с нами для обсуждения вашей задачи. Первая консультация бесплатно!
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-              <div className="flex items-center gap-2">
-                <Icon name="Mail" size={20} className="text-primary" />
-                <span>info@techsolutions.com</span>
+          <Card className="p-8 md:p-12 bg-gradient-to-br from-primary/10 via-secondary/10 to-primary/10 border-2 border-primary/20">
+            <div className="text-center mb-8">
+              <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4">
+                Готовы начать проект?
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Заполните форму, и мы свяжемся с вами в течение 24 часов. Первая консультация бесплатно!
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Ваше имя *</label>
+                  <Input
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Иван Иванов"
+                    required
+                    className="bg-background"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Email *</label>
+                  <Input
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="ivan@company.com"
+                    required
+                    className="bg-background"
+                  />
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Icon name="Phone" size={20} className="text-primary" />
-                <span>+7 (495) 123-45-67</span>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Телефон *</label>
+                  <Input
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="+7 (999) 123-45-67"
+                    required
+                    className="bg-background"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Компания</label>
+                  <Input
+                    name="company"
+                    value={formData.company}
+                    onChange={handleChange}
+                    placeholder="Название компании"
+                    className="bg-background"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Описание проекта *</label>
+                <Textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  placeholder="Расскажите о вашем проекте, целях и требованиях..."
+                  required
+                  rows={5}
+                  className="bg-background resize-none"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                size="lg"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-lg"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Icon name="Loader2" size={20} className="mr-2 animate-spin" />
+                    Отправка...
+                  </>
+                ) : (
+                  <>
+                    <Icon name="Send" size={20} className="mr-2" />
+                    Отправить заявку
+                  </>
+                )}
+              </Button>
+            </form>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-8 pt-8 border-t border-border">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Icon name="Mail" size={18} className="text-primary" />
+                <span className="text-sm">info@techsolutions.com</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Icon name="Phone" size={18} className="text-primary" />
+                <span className="text-sm">+7 (495) 123-45-67</span>
               </div>
             </div>
-            <Button size="lg" className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-lg">
-              <Icon name="Send" size={20} className="mr-2" />
-              Оставить заявку
-            </Button>
           </Card>
         </div>
       </section>
